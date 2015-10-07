@@ -17,14 +17,14 @@ class scaleio::device inherits scaleio {
 
 	if $sio_sds_device {
 		$sds = $sio_sds_device[$fqdn]
-		if($sds) {
+		if $sds {
 				notify { "Checking ${fqdn} devices": }
 
 				$device_paths = keys($sds['devices'])
 				create_device { $device_paths:
 					devices => $sds['devices'],
 				}
-				
+
 		} else {
 			notify { "SDS ${fqdn} not configured for device": }
 		}

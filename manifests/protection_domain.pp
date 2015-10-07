@@ -15,7 +15,7 @@ class scaleio::protection_domain inherits scaleio {
   }
 
   if $mdm_ip[1] in $ip_address_array and 'mdm' in $components and $scaleio_mdm_state == 'Running' {
-    if($sio_sds_device) {
+    if $sio_sds_device {
       $node_keys = keys($sio_sds_device)
       enable_protection_domain { $node_keys:
         nodes => $sio_sds_device,
