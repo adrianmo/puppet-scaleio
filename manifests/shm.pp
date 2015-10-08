@@ -5,7 +5,7 @@ class scaleio::shm inherits scaleio {
 	exec { 'shm':
 	  command => "mount -o remount -o size=${shm_size} /dev/shm",
 	  path => ["/bin","/usr/bin"],
-	  onlyif => [ "test `df -B1 /dev/shm | awk '/\/dev\/shm/ { print \$4; }'` -lt ${shm_size}" ],
+	  onlyif => [ "/usr/bin/test `df -B1 /dev/shm |grep /dev/shm |awk '{ print $4 }'` -lt ${shm_size}" ],
 	} ->
 
 #	`cat /etc/fstab | grep "/dev/shm" | awk '{ print $4;}' | awk -F, '{ print $2}' | grep size | awk -F= '{ print $2}'`
@@ -15,11 +15,10 @@ class scaleio::shm inherits scaleio {
 	    line => "tmpfs  /dev/shm  tmpfs defaults,size=${shm_size}  0 0",
 	} ->
 
-		if ($::kernelshmmax.scanf("%i")[0] < 209715200) {
-	    exec {'set kernel shmmax' :
-	      command   => 'sysctl -p 209715200',
-	      logoutput => true,
-	      path      => '/sbin',
-	    }
-    } else { notify {'kernelshmmax set correctly':} }
+	exec { 'set kernel shmmax':
+	  command   => 'sysctl -w kernel.shmmax=209715200',
+	  logoutput => true,
+	  path      => '/sbin',
+		onlyif    => [ "/usr/bin/test `cat /proc/sys/kernel/shmmax` -lt 209715200" ],
+	}
 }

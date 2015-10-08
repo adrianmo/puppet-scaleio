@@ -29,13 +29,9 @@ class scaleio::os_prep inherits scaleio {
     include 'scaleio::firewall::tbfirewall'
   }
 
-  package { 'numactl' :
+  package { [ 'numactl', 'libaio' ] :
     ensure => present,
-  }  ->
-
-  package {'libaio' :
-    ensure => present
-  } ->
+  }
 
   if $scaleio::sds_network {
     file_line { 'Append a FACTER_scaleio_sds_network line to /etc/environment':
@@ -45,7 +41,7 @@ class scaleio::os_prep inherits scaleio {
     }
   } else {
     notify { 'sds_network not set': }
-  } ->
+  }
 
   if 'sds' in $scaleio::components and $scaleio::sds_ssd_env_flag {
     file_line { 'Append a CONF=IOPS line to /etc/environment':
@@ -55,13 +51,13 @@ class scaleio::os_prep inherits scaleio {
     }
   } else {
     notify { 'sds not in components and/or sds_ssd_env_flag not set': }
-  } ->
+  }
 
   file { "${scaleio::path}" :
     ensure => directory,
     owner  => root,
     group  => root,
-  } ->
+  }
 
   if 'gui' in $scaleio::components or 'gw' in $scaleio::components {
     if !$javaversion or $javaversion < "1.6" {
@@ -74,6 +70,5 @@ class scaleio::os_prep inherits scaleio {
   } else {
     notify {  'gui not specified or jdk at correct version':  }
   }
-
 
 }

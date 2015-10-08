@@ -11,7 +11,7 @@ class scaleio::install inherits scaleio {
       }
     } else {
       notify { 'component "tb" not specified':  }
-    } ->
+    }
 
     ###########################################
     # Installation of meta-data-manager (mdm) #
@@ -26,7 +26,7 @@ class scaleio::install inherits scaleio {
       }
     } else {
       notify {  'component "mdm" not specified':  }
-    } ->
+    }
 
     ##################################################
     # Installation of Software-Defined-Storage (sds) #
@@ -37,7 +37,7 @@ class scaleio::install inherits scaleio {
       }
     } else {
       notify {  'component "sds" not specified':  }
-    } ->
+    }
 
     ##################################################
     # Installation of Software-Defined-Client (sdc) #
@@ -48,7 +48,7 @@ class scaleio::install inherits scaleio {
       }
     } else {
       notify {  'sdc component not specified':  }
-    } ->
+    }
 
     #######################
     # Installation of lia #
@@ -59,7 +59,7 @@ class scaleio::install inherits scaleio {
       }
     } else {
       notify {  'lia component not specified':  }
-    } ->
+    }
 
     ###########################################
     # Installation of Gateway/WebService (gw) #
@@ -71,7 +71,7 @@ class scaleio::install inherits scaleio {
       }
     } else {
       notify {  'gw component not specified': }
-    } ->
+    }
 
     ##################################################
     # Installation of Graphical User Interface (gui) #
@@ -82,7 +82,7 @@ class scaleio::install inherits scaleio {
       }
     } else {
       notify {  'gui component not specified': }
-    } ->
+    }
 
     #############################
     # Installation of callhome  #
