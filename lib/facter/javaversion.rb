@@ -15,4 +15,3 @@ Facter.add("javaversion") do
     end
   end
 end
-
