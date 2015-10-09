@@ -35,9 +35,9 @@ class scaleio::os_prep inherits scaleio {
 
   if $scaleio::sds_network {
     file_line { 'Append a FACTER_scaleio_sds_network line to /etc/environment':
-        path => '/etc/environment',
-        match => "^FACTER_scaleio_sds_network=",
-        line => "FACTER_scaleio_sds_network=${scaleio::sds_network}",
+      path  => '/etc/environment',
+      match => '^FACTER_scaleio_sds_network=',
+      line  => "FACTER_scaleio_sds_network=${scaleio::sds_network}",
     }
   } else {
     notify { 'sds_network not set': }
@@ -45,15 +45,15 @@ class scaleio::os_prep inherits scaleio {
 
   if 'sds' in $scaleio::components and $scaleio::sds_ssd_env_flag {
     file_line { 'Append a CONF=IOPS line to /etc/environment':
-        path => '/etc/environment',
-        match => "^CONF=",
-        line => "CONF=IOPS",
+      path  => '/etc/environment',
+      match => '^CONF=',
+      line  => 'CONF=IOPS',
     }
   } else {
     notify { 'sds not in components and/or sds_ssd_env_flag not set': }
   }
 
-  file { "${scaleio::path}" :
+  file { $scaleio::path :
     ensure => directory,
     owner  => root,
     group  => root,
