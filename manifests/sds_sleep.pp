@@ -3,9 +3,9 @@ class scaleio::sds_sleep inherits scaleio {
   $components              = $scaleio::components
   $sio_sds_device          = $scaleio::sio_sds_device
 
-  define add_sds_sleep ($nodes, $node_key = $title) {
+  define add_sds_sleep ($nodes, $mdm_ip, $node_key = $title) {
     $node = $nodes[$node_key]
-    exec {"Add SDS ${node} Sleep 30":
+    exec {"Add SDS ${node_key} Sleep 30":
             command => 'sleep 30',
             path => '/bin',
             require => Class['::scaleio::login'],
@@ -18,6 +18,7 @@ class scaleio::sds_sleep inherits scaleio {
       $node_keys = keys($sio_sds_device)
       add_sds_sleep { $node_keys:
         nodes => $sio_sds_device,
+        mdm_ip => $mdm_ip,
       }
     } else { notify {'SDS_SLEEP - No sio_sds_device specified':} }
   } else { notify {'SDS_SLEEP - Not specified as secondary MDM or MDM not running':} }

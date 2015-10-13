@@ -4,7 +4,7 @@ class scaleio::volume inherits scaleio {
   $components              = $scaleio::components
   $sio_sdc_volume          = $scaleio::sio_sdc_volume
 
-  define add_volume ($volumes, $volume_key = $title) {
+  define add_volume ($volumes, $mdm_ip, $volume_key = $title) {
     $volume = $volumes[$volume_key]
     $size_gb = $volumes['size_gb']
     $protection_domain = $volumes['protection_domain']
@@ -19,17 +19,18 @@ class scaleio::volume inherits scaleio {
     }
   }
 
-	if $mdm_ip[1] in $ip_address_array and 'mdm' in $components and $scaleio_mdm_state == "Running" {
-	  if $sio_sdc_volume {
+  if $mdm_ip[1] in $ip_address_array and 'mdm' in $components and $scaleio_mdm_state == "Running" {
+    if $sio_sdc_volume {
       $volume_keys = keys($sio_sdc_volume)
       add_volume { $volume_keys:
         volumes => $sio_sdc_volume,
+        mdm_ip => $mdm_ip,
       }
-	  }
+    }
     else {
       notify { 'VOLUME - sio_sdc_volume not specified': }
     }
-	}
+  }
   else {
     notify {'VOLUME - Not specified as secondary MDM or MDM not running':}
   }

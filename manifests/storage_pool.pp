@@ -4,7 +4,7 @@ class scaleio::storage_pool inherits scaleio {
   $components              = $scaleio::components
   $sio_sds_device          = $scaleio::sio_sds_device
 
-  define enable_storage_pool ( $nodes, $node_key = $title ) {
+  define enable_storage_pool ( $nodes, $mdm_ip, $node_key = $title ) {
     $node = $nodes[$node_key]
     $protection_domain = $node['protection_domain']
     $device_keys = keys($node['devices'])
@@ -12,10 +12,11 @@ class scaleio::storage_pool inherits scaleio {
       node_name => $node_key,
       protection_domain => $protection_domain,
       devices => $node['devices'],
+      mdm_ip => $mdm_ip,
     }
   }
 
-  define enable_storage_pool_device ( $node_name, $protection_domain, $devices, $device_path = $title ) {
+  define enable_storage_pool_device ( $node_name, $protection_domain, $devices, $mdm_ip, $device_path = $title ) {
     $device = $devices[$device_path]
     $storage_pool = $device['storage_pool']
     if $storage_pool {
@@ -33,6 +34,7 @@ class scaleio::storage_pool inherits scaleio {
       $node_keys = keys($sio_sds_device)
       enable_storage_pool { $node_keys:
         nodes => $sio_sds_device,
+        mdm_ip => $mdm_ip,
       }
     } else {
       notify {  'Storage Pool - sio_sdc_volume not specified':  }

@@ -4,9 +4,9 @@ class scaleio::protection_domain inherits scaleio {
   $components              = $scaleio::components
   $sio_sds_device          = $scaleio::sio_sds_device
 
-  define enable_protection_domain ($nodes, $node_key = $title) {
+  define enable_protection_domain ($nodes, $mdm_ip, $node_key = $title) {
     $protection_domain = $nodes[$node_key]['protection_domain']
-    exec { "Enable Protection Domain ${protection_domain} for SDS ${node}":
+    exec { "Enable Protection Domain ${protection_domain} for SDS ${node_key}":
       command => "scli --add_protection_domain --mdm_ip ${mdm_ip[0]} --protection_domain_name '${protection_domain}'",
       path    => '/bin',
       unless  => "scli --query_all --mdm_ip ${mdm_ip[0]} | grep \"^Protection Domain ${protection_domain}\"",
@@ -19,6 +19,7 @@ class scaleio::protection_domain inherits scaleio {
       $node_keys = keys($sio_sds_device)
       enable_protection_domain { $node_keys:
         nodes => $sio_sds_device,
+        mdm_ip => $mdm_ip,
       }
     } else {
       notify {  'Protection Domain - sio_sdc_volume not specified': }
