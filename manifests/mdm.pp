@@ -23,7 +23,7 @@ class scaleio::mdm inherits scaleio {
       notify { 'This is the primary MDM': } ->
       notify { "scaleio_mdm_state = ${scaleio_mdm_state}": } ->
       notify { "scaleio_primary_ip = ${scaleio_primary_ip}": }
-      if $scaleio_mdm_state == 'Running' and (!$scaleio_primary_ip or $scaleio_primary_ip == "N/A") {
+      if $scaleio_mdm_state == 'Running' and (!$scaleio_primary_ip or $scaleio_primary_ip == 'N/A') {
         exec { 'Add Primary MDM':
           command => "scli --mdm --add_primary_mdm --primary_mdm_ip ${mdm_ip[0]} --mdm_management_ip ${mdm_ip[0]} --accept_license",
           path    => '/bin',
@@ -44,7 +44,7 @@ class scaleio::mdm inherits scaleio {
       notify { "default_password: ${default_passwod}, password: ${password}": } ->
       notify { "MDMs: ${mdm_ip}": }
       # !facter represents a missing facter, hence a first puppet run before mdm service
-      if $scaleio_mdm_state == 'Running' and !$scaleio_secondary_ip {
+      if $scaleio_mdm_state == 'Running' and (!$scaleio_secondary_ip or $scaleio_secondary_ip == 'N/A'){
         exec { '1st Login':
           command => "scli --mdm_ip ${mdm_ip[0]} --login --username admin --password ${default_password}",
           path    => '/bin',
