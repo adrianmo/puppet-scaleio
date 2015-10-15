@@ -5,13 +5,13 @@ if File.exist?("/bin/emc/scaleio/drv_cfg.txt")
   if drv_cfg_mdm_primary_ip
     Facter.add("scaleio_primary_ip") do
       setcode do
-        Facter::Util::Resolution.exec("/bin/scli --mdm_ip #{drv_cfg_mdm_primary_ip} --query_cluster 2> /dev/null | grep 'Primary IP' | awk '{print $3}'")
+        Facter::Util::Resolution.exec("/bin/scli --mdm_ip #{drv_cfg_mdm_primary_ip} --query_cluster 2> /dev/null | grep 'Primary MDM IP' | awk '{print $4}'")
       end
     end
 
     Facter.add("scaleio_secondary_ip") do
       setcode do
-        Facter::Util::Resolution.exec("/bin/scli --mdm_ip #{drv_cfg_mdm_primary_ip} --query_cluster 2> /dev/null | grep 'Secondary IP' | awk '{print $3}'")
+        Facter::Util::Resolution.exec("/bin/scli --mdm_ip #{drv_cfg_mdm_primary_ip} --query_cluster 2> /dev/null | grep 'Secondary MDM IP' | awk '{print $4}'")
       end
     end
 

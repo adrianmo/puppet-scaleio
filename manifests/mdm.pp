@@ -20,32 +20,41 @@ class scaleio::mdm inherits scaleio {
     }
 
     if $mdm_ip[0] in $ip_address_array {
-      notify {'This is the primary MDM':}
-      if $scaleio_mdm_state == 'Running' and !$scaleio_primary_ip {
+      notify { 'This is the primary MDM': } ->
+      notify { "scaleio_mdm_state = ${scaleio_mdm_state}": } ->
+      notify { "scaleio_primary_ip = ${scaleio_primary_ip}": }
+      if $scaleio_mdm_state == 'Running' and (!$scaleio_primary_ip or $scaleio_primary_ip == "N/A") {
         exec { 'Add Primary MDM':
           command => "scli --mdm --add_primary_mdm --primary_mdm_ip ${mdm_ip[0]} --mdm_management_ip ${mdm_ip[0]} --accept_license",
           path    => '/bin',
         }
       } else { notify {'Skipped Add Primary MDM':} }
-    } else { notify {'Not primary MDM':} }
+    }
+    else {
+      notify {'Not primary MDM':} ->
+      exec { 'Wait for MDM':
+        command => 'sleep 10m',
+        path    => '/usr/bin:/bin',
+      }
+    }
 
     if $mdm_ip[1] in $ip_address_array {
       notify { "scaleio_secondary_ip = '${scaleio_secondary_ip}'":}  ->
       notify { "scaleio_mdm_state = '${scaleio_mdm_state}'":}  ->
-      notify { "default_password: $default_passwod, password: $password": } ->
-      notify { "MDMs: $mdm_ip": }
+      notify { "default_password: ${default_passwod}, password: ${password}": } ->
+      notify { "MDMs: ${mdm_ip}": }
       # !facter represents a missing facter, hence a first puppet run before mdm service
       if $scaleio_mdm_state == 'Running' and !$scaleio_secondary_ip {
         exec { '1st Login':
-          command => "scli --mdm_ip ${mdm_ip[0]} --login --username admin --password '${default_password}'",
+          command => "scli --mdm_ip ${mdm_ip[0]} --login --username admin --password ${default_password}",
           path    => '/bin',
         } ->
         exec { 'Set 1st Password':
-          command => "scli --mdm_ip ${mdm_ip[0]} --set_password --old_password admin --new_password '${password}'",
+          command => "scli --mdm_ip ${mdm_ip[0]} --set_password --old_password admin --new_password ${password}",
           path    => '/bin',
         } ->
         exec { '1st Login New Password':
-          command => "scli --mdm_ip ${mdm_ip[0]} --login --username admin --password '${password}'",
+          command => "scli --mdm_ip ${mdm_ip[0]} --login --username admin --password ${password}",
           path    => '/bin',
         } ->
         exec { 'Add Secondary MDM':
