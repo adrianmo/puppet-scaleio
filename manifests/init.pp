@@ -57,38 +57,54 @@ class scaleio (
   if $use_ssd           { validate_bool($use_ssd)           }
   if $version           { validate_string($version)         }
 
-  # include '::scaleio::login'
-  # include '::scaleio::iptables'
-  # include '::scaleio::drv_cfg'
-  # include '::scaleio::device'
-  # include '::scaleio::os_prep'
-  # include '::scaleio::install'
-  # include '::scaleio::shm'
-  # include '::scaleio::mdm'
-  # include '::scaleio::protection_domain'
-  # include '::scaleio::storage_pool'
-  # include '::scaleio::sds_first'
-  # include '::scaleio::sds_sleep'
-  # include '::scaleio::sds'
-  # include '::scaleio::volume'
-  # include '::scaleio::map_volume'
-  # include '::scaleio::gateway'
-  # include '::scaleio::callhome'
+  # include scaleio::login
+  # include scaleio::iptables
+  # include scaleio::drv_cfg
+  # include scaleio::device
+  # include scaleio::os_prep
+  # include scaleio::install
+  # include scaleio::shm
+  # include scaleio::mdm
+  # include scaleio::protection_domain
+  # include scaleio::storage_pool
+  # include scaleio::sds_first
+  # include scaleio::sds_sleep
+  # include scaleio::sds
+  # include scaleio::volume
+  # include scaleio::map_volume
+  # include scaleio::gateway
+  # include scaleio::callhome
 
-  Class['::scaleio::iptables']          ->
-  Class['::scaleio::device']            ->
-  Class['::scaleio::drv_cfg']           ->
-  Class['::scaleio::os_prep']           ->
-  Class['::scaleio::install']           ->
-  Class['::scaleio::mdm']               ->
-  Class['::scaleio::protection_domain'] ->
-  Class['::scaleio::storage_pool']      ->
-  Class['::scaleio::sds_first']         ->
-  Class['::scaleio::sds']               ->
-  Class['::scaleio::sds_sleep']         ->
-  Class['::scaleio::volume']            ->
-  Class['::scaleio::map_volume']        ->
-  Class['::scaleio::gateway']           ->
-  Class['::scaleio::callhome']
+  # Class['::scaleio::iptables']          ->
+  # Class['::scaleio::device']            ->
+  # Class['::scaleio::drv_cfg']           ->
+  # Class['::scaleio::os_prep']           ->
+  # Class['::scaleio::install']           ->
+  # Class['::scaleio::mdm']               ->
+  # Class['::scaleio::protection_domain'] ->
+  # Class['::scaleio::storage_pool']      ->
+  # Class['::scaleio::sds_first']         ->
+  # Class['::scaleio::sds']               ->
+  # Class['::scaleio::sds_sleep']         ->
+  # Class['::scaleio::volume']            ->
+  # Class['::scaleio::map_volume']        ->
+  # Class['::scaleio::gateway']           ->
+  # Class['::scaleio::callhome']
+
+  class {'scaleio::iptables': }          ->
+  class {'scaleio::device': }            ->
+  class {'scaleio::drv_cfg': }           ->
+  class {'scaleio::os_prep': }           ->
+  class {'scaleio::install': }           ->
+  class {'scaleio::mdm': }               ->
+  class {'scaleio::protection_domain': } ->
+  class {'scaleio::storage_pool': }      ->
+  class {'scaleio::sds_first': }         ->
+  class {'scaleio::sds': }               ->
+  class {'scaleio::sds_sleep': }         ->
+  class {'scaleio::volume': }            ->
+  class {'scaleio::map_volume': }        ->
+  class {'scaleio::gateway': }           ->
+  class {'scaleio::callhome': }
 
 }
