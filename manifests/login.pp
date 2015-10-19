@@ -8,5 +8,5 @@ class scaleio::login inherits scaleio {
       command => "scli --mdm_ip ${mdm_ip[0]} --login --username admin --password ${password}",
       path    => '/bin',
       }
-  } else { notify { 'Not logging in since not MDM': } }
+  } else { notify { 'Not logging in since not MDM 1': } }
 }
