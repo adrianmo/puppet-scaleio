@@ -2,7 +2,7 @@ class scaleio::install::gw {
 
   if 'gw' in $scaleio::components {
     package { $scaleio::pkgs['gw']:
-      ensure  => $scaleio::version,
+      ensure  => installed,
       # require => Package[ 'java' ],
     }
   } else {

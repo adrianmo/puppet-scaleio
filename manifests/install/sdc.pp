@@ -2,7 +2,7 @@ class scaleio::install::sdc {
 
   if 'sdc' in $scaleio::components {
     package { $scaleio::pkgs['sdc']:
-      ensure   => $scaleio::version,
+      ensure   => installed,
     }
   } else {
     notify {  'sdc component not specified':  }

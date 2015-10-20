@@ -2,12 +2,12 @@ class scaleio::install::mdm {
 
   if 'mdm' in $scaleio::components {
     include scaleio::shm
-    
+
     package { ['mutt', 'python', 'python-paramiko' ]:
-      ensure => present,
+      ensure => installed,
     } ->
     package { $scaleio::pkgs['mdm']:
-      ensure  => $scaleio::version,
+      ensure  => installed,
       require => Class[ '::scaleio::shm' ],
     }
   } else {
