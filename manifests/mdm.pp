@@ -12,10 +12,22 @@ class scaleio::mdm inherits scaleio {
   $sio_sdc_volume          = $scaleio::sio_sdc_volume
 
 
-  define change_password ($scaleio_secondary_ip, $scaleio_mdm_state, $password, $default_passwod, $mdm_ip) {
+  define add_primary_mdm ($scaleio_mdm_state, $scaleio_primary_ip, $mdm_ip) {
+
+    if $scaleio_mdm_state == 'Running' and (!$scaleio_primary_ip or $scaleio_primary_ip == 'N/A') {
+      exec { 'Add Primary MDM':
+        command => "scli --mdm --add_primary_mdm --primary_mdm_ip ${mdm_ip[0]} --mdm_management_ip ${mdm_ip[0]} --accept_license",
+        path    => '/bin',
+      }
+    } else {
+      notify {'Skipped Add Primary MDM': }
+    }
+  }
+
+  define change_password ($scaleio_secondary_ip, $scaleio_mdm_state, $password, $default_password, $mdm_ip) {
     notify { "scaleio_secondary_ip = '${scaleio_secondary_ip}'":}  ->
     notify { "scaleio_mdm_state = '${scaleio_mdm_state}'":}  ->
-    notify { "default_password: ${default_passwod}, password: ${password}": } ->
+    notify { "default_password: ${default_password}, password: ${password}": } ->
     notify { "MDMs: ${mdm_ip}": }
     # !facter represents a missing facter, hence a first puppet run before mdm service
     if $scaleio_mdm_state == 'Running' and (!$scaleio_secondary_ip or $scaleio_secondary_ip == 'N/A'){
@@ -35,7 +47,7 @@ class scaleio::mdm inherits scaleio {
         command => "scli --add_secondary_mdm --mdm_ip ${mdm_ip[0]} --secondary_mdm_ip ${mdm_ip[1]}",
         path    => '/bin',
       }
-    }  else { notify {'Skipped Password Set and 2nd MDM Add':} }
+    }  else { notify {'Skipped Password Set and 2nd MDM Add': } }
   }
 
   define add_tiebreaker ($scaleio_mdm_state, $scaleio_tb_ip, $tb_ip, $mdm_ip) {
@@ -83,40 +95,58 @@ class scaleio::mdm inherits scaleio {
   if 'mdm' in $components {
     $join_mdm_ip = join($mdm_ip,',')
     file_line { 'Append line for mdm_ip to /etc/environment':
-        path => '/etc/environment',
+        path  => '/etc/environment',
         match => "^mdm_ip=",
-        line => "mdm_ip=${join_mdm_ip}",
+        line  => "mdm_ip=${join_mdm_ip}",
     }
 
     if $mdm_ip[0] in $ip_address_array {
       notify { 'This is the primary MDM': } ->
+      notify { "scaleio_primary_ip = ${scaleio_primary_ip}": } ->
       notify { "scaleio_mdm_state = ${scaleio_mdm_state}": } ->
-      notify { "scaleio_primary_ip = ${scaleio_primary_ip}": }
-      if $scaleio_mdm_state == 'Running' and (!$scaleio_primary_ip or $scaleio_primary_ip == 'N/A') {
-        exec { 'Add Primary MDM':
-          command => "scli --mdm --add_primary_mdm --primary_mdm_ip ${mdm_ip[0]} --mdm_management_ip ${mdm_ip[0]} --accept_license",
-          path    => '/bin',
-        }
-      } else { notify {'Skipped Add Primary MDM':} }
-    }
-    else {
-      notify {'Not primary MDM':} ->
-      exec { 'Wait for MDM (10 minutes)':
-        command => 'sleep 600',
-        path    => '/usr/bin:/bin',
-        timeout => 700,
+      notify { "scaleio_sshd_state = ${scaleio_sshd_state}": } ->
+
+      wait_for { 'pgrep mdm':
+        exit_code         => 0,
+        polling_frequency => 60,
+        max_retries       => 10,
+      } ->
+
+      add_primary_mdm { 'Add Primary MDM':
+        scaleio_mdm_state  => $scaleio_mdm_state,
+        scaleio_primary_ip => $scaleio_primary_ip,
+        mdm_ip             => $mdm_ip,
       }
+
+    } else {
+      notify {'Not primary MDM': }
     }
 
     if $mdm_ip[1] in $ip_address_array {
 
       notify {'This is the secondary MDM':} ->
 
+      exec { 'Wait for primary MDM (10 minutes)':
+        command => 'sleep 600',
+        path    => '/usr/bin:/bin',
+        timeout => 700,
+      } ->
+
+      wait_for { 'pgrep mdm':
+        exit_code         => 0,
+        polling_frequency => 60,
+        max_retries       => 10,
+      } ->
+
+      notify { "scaleio_mdm_state = ${scaleio_mdm_state}": } ->
+
+      notify { "scaleio_sshd_state = ${scaleio_sshd_state}": } ->
+
       change_password { 'Change ScaleIO password':
         scaleio_secondary_ip => $scaleio_secondary_ip,
         scaleio_mdm_state    => $scaleio_mdm_state,
         password             => $password,
-        default_passwod      => $default_passwod,
+        default_password     => $default_password,
         mdm_ip               => $mdm_ip,
       } ->
 
