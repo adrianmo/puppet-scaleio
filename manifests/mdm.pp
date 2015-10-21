@@ -108,7 +108,7 @@ class scaleio::mdm inherits scaleio {
       notify { 'This is the primary MDM': } ->
 
       add_to_environment { 'Add MDM IP to environment':
-        mdm_io => $mdm_ip,
+        mdm_ip => $mdm_ip,
       } ->
 
       exec { 'Wait (2 minutes)':
@@ -141,7 +141,7 @@ class scaleio::mdm inherits scaleio {
       notify {'This is the secondary MDM':} ->
 
       add_to_environment { 'Add MDM IP to environment':
-        mdm_io => $mdm_ip,
+        mdm_ip => $mdm_ip,
       } ->
 
       exec { 'Wait for primary MDM (10 minutes)':
