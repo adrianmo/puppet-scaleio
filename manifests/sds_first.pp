@@ -20,10 +20,9 @@ class scaleio::sds_first inherits scaleio {
     }
   }
 
-  if $mdm_ip[1] in $ip_address_array and 'mdm' in $components and $scaleio_mdm_state == "Running" {
+  if $mdm_ip[1] in $ip_address_array and 'mdm' in $components {
 
     if $sio_sds_device {
-
       $node_keys = keys($sio_sds_device)
       add_sds { $node_keys:
         nodes => $sio_sds_device,

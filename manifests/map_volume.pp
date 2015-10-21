@@ -24,7 +24,7 @@ class scaleio::map_volume inherits scaleio {
     }
   }
 
-  if $mdm_ip[1] in $ip_address_array and 'mdm' in $components and $scaleio_mdm_state == "Running" {
+  if $mdm_ip[1] in $ip_address_array and 'mdm' in $components {
     if $sio_sdc_volume {
       $volume_keys = keys($sio_sdc_volume)
       map_volume_to_sdc { $volume_keys:

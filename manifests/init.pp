@@ -102,8 +102,8 @@ class scaleio (
   class {'scaleio::sds_first': }         ->
   class {'scaleio::sds': }               ->
   class {'scaleio::sds_sleep': }         ->
-  class {'scaleio::volume': }            ->
-  class {'scaleio::map_volume': }        ->
+  # class {'scaleio::volume': }            ->
+  # class {'scaleio::map_volume': }        ->
   class {'scaleio::gateway': }           ->
   class {'scaleio::callhome': }
 

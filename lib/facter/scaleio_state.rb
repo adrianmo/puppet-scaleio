@@ -17,12 +17,3 @@ Facter.add("scaleio_sds_state") do
   "Running" if output
   end
 end
-
-Facter.add("scaleio_sshd_state") do
-  setcode do
-
-  output = Facter::Util::Resolution.exec('pgrep sshd')
-
-  "Running" if output
-  end
-end

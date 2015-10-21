@@ -14,7 +14,7 @@ class scaleio::protection_domain inherits scaleio {
     }
   }
 
-  if $mdm_ip[1] in $ip_address_array and 'mdm' in $components and $scaleio_mdm_state == 'Running' {
+  if $mdm_ip[1] in $ip_address_array and 'mdm' in $components {
     if $sio_sds_device {
       $node_keys = keys($sio_sds_device)
       enable_protection_domain { $node_keys:
@@ -22,7 +22,7 @@ class scaleio::protection_domain inherits scaleio {
         mdm_ip => $mdm_ip,
       }
     } else {
-      notify {  'Protection Domain - sio_sdc_volume not specified': }
+      notify {  'Protection Domain - sio_sds_device not specified': }
     }
   } else {
     notify {  'Protection Domain - Not specified as secondary MDM or MDM not running':  }

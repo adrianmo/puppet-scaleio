@@ -11,10 +11,20 @@ class scaleio::mdm inherits scaleio {
   $components              = $scaleio::components
   $sio_sdc_volume          = $scaleio::sio_sdc_volume
 
+  include wait_for
+
+  define add_to_environment ($mdm_ip) {
+    $join_mdm_ip = join($mdm_ip,',')
+    file_line { 'Append line for mdm_ip to /etc/environment':
+        path  => '/etc/environment',
+        match => "^mdm_ip=",
+        line  => "mdm_ip=${join_mdm_ip}",
+    }
+  }
 
   define add_primary_mdm ($scaleio_mdm_state, $scaleio_primary_ip, $mdm_ip) {
 
-    if $scaleio_mdm_state == 'Running' and (!$scaleio_primary_ip or $scaleio_primary_ip == 'N/A') {
+    if !$scaleio_primary_ip or $scaleio_primary_ip == 'N/A' {
       exec { 'Add Primary MDM':
         command => "scli --mdm --add_primary_mdm --primary_mdm_ip ${mdm_ip[0]} --mdm_management_ip ${mdm_ip[0]} --accept_license",
         path    => '/bin',
@@ -30,7 +40,7 @@ class scaleio::mdm inherits scaleio {
     notify { "default_password: ${default_password}, password: ${password}": } ->
     notify { "MDMs: ${mdm_ip}": }
     # !facter represents a missing facter, hence a first puppet run before mdm service
-    if $scaleio_mdm_state == 'Running' and (!$scaleio_secondary_ip or $scaleio_secondary_ip == 'N/A'){
+    if !$scaleio_secondary_ip or $scaleio_secondary_ip == 'N/A' {
       exec { '1st Login':
         command => "scli --mdm_ip ${mdm_ip[0]} --login --username admin --password ${default_password}",
         path    => '/bin',
@@ -55,7 +65,7 @@ class scaleio::mdm inherits scaleio {
     notify {"Adding Tie-Breaker. TB IP: '${scaleio_tb_ip}'": }
     #using mdm_ip versus scaleio_primary_ip since scaleio_primary_ip may not be populated if first run
 
-    if $scaleio_mdm_state == 'Running' and (!$scaleio_tb_ip or $scaleio_tb_ip == 'N/A') {
+    if !$scaleio_tb_ip or $scaleio_tb_ip == 'N/A' {
       exec { 'Add TB':
         command => "scli --add_tb --mdm_ip ${mdm_ip[0]} --tb_ip ${tb_ip}",
         path    => '/bin',
@@ -93,24 +103,28 @@ class scaleio::mdm inherits scaleio {
 
 
   if 'mdm' in $components {
-    $join_mdm_ip = join($mdm_ip,',')
-    file_line { 'Append line for mdm_ip to /etc/environment':
-        path  => '/etc/environment',
-        match => "^mdm_ip=",
-        line  => "mdm_ip=${join_mdm_ip}",
-    }
 
     if $mdm_ip[0] in $ip_address_array {
       notify { 'This is the primary MDM': } ->
-      notify { "scaleio_primary_ip = ${scaleio_primary_ip}": } ->
-      notify { "scaleio_mdm_state = ${scaleio_mdm_state}": } ->
-      notify { "scaleio_sshd_state = ${scaleio_sshd_state}": } ->
+
+      add_to_environment { 'Add MDM IP to environment':
+        mdm_io => $mdm_ip,
+      } ->
+
+      exec { 'Wait (2 minutes)':
+        command => 'sleep 120',
+        path    => '/usr/bin:/bin',
+        timeout => 150,
+      } ->
 
       wait_for { 'pgrep mdm':
         exit_code         => 0,
         polling_frequency => 60,
         max_retries       => 10,
       } ->
+
+      notify { "scaleio_primary_ip = ${scaleio_primary_ip}": } ->
+      notify { "scaleio_mdm_state = ${scaleio_mdm_state}": } ->
 
       add_primary_mdm { 'Add Primary MDM':
         scaleio_mdm_state  => $scaleio_mdm_state,
@@ -126,6 +140,10 @@ class scaleio::mdm inherits scaleio {
 
       notify {'This is the secondary MDM':} ->
 
+      add_to_environment { 'Add MDM IP to environment':
+        mdm_io => $mdm_ip,
+      } ->
+
       exec { 'Wait for primary MDM (10 minutes)':
         command => 'sleep 600',
         path    => '/usr/bin:/bin',
@@ -139,8 +157,7 @@ class scaleio::mdm inherits scaleio {
       } ->
 
       notify { "scaleio_mdm_state = ${scaleio_mdm_state}": } ->
-
-      notify { "scaleio_sshd_state = ${scaleio_sshd_state}": } ->
+      notify { "scaleio_secondary_ip = ${scaleio_secondary_ip}": } ->
 
       change_password { 'Change ScaleIO password':
         scaleio_secondary_ip => $scaleio_secondary_ip,
@@ -174,7 +191,7 @@ class scaleio::mdm inherits scaleio {
       notify { 'Secondary MDM configuration finished': }
 
     } else {
-      notify {'Not in secondary MDM': }
+      notify {'Not secondary MDM': }
     }
 
   }

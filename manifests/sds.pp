@@ -26,7 +26,7 @@ class scaleio::sds inherits scaleio {
     }
   }
 
-  if $mdm_ip[1] in $ip_address_array and 'mdm' in $components and $scaleio_mdm_state == "Running" {
+  if $mdm_ip[1] in $ip_address_array and 'mdm' in $components {
 
     if $sio_sds_device {
       $node_keys = keys($sio_sds_device)
