@@ -1,6 +1,6 @@
 # ScaleIO
 
-> **Important note:** This is a fork of [emccode/puppet-scaleio](https://github.com/emccode-scaleio). I modified the original Puppet module to make it work with the [ScaleIO plugin for Fuel](https://github.com/openstack/fuel-plugin-scaleio). Fuel nodes have a particular environment that was not compatible with the original Puppet module (i.e., CentOS 6.5, Puppet 3.4, Facter 1.7). This module has only been tested in the mentioned environment, but it should continue working in other scenarios.
+> **Important note:** This is a fork of [emccode/puppet-scaleio](https://github.com/emccode/puppet-scaleio). I modified the original Puppet module to make it work with the [ScaleIO plugin for Fuel](https://github.com/openstack/fuel-plugin-scaleio). Fuel nodes have a particular environment that was not compatible with the original Puppet module (i.e., CentOS 6.5, Puppet 3.4, Facter 1.7). This module has only been tested in the mentioned environment, but it should continue working in other scenarios.
 
 #### Table of Contents
 
