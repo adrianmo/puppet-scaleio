@@ -3,18 +3,17 @@ class scaleio::sds inherits scaleio {
   $components              = $scaleio::components
   $sio_sds_device          = $scaleio::sio_sds_device
 
-  define add_sds_node ( $nodes, $mdm_ip, $node_key = $title ) {
-    $node = $nodes[$node_key]
-    $device_keys = keys($node['devices'])
-    add_sds_device { $device_keys:
-      node_name => $node_key,
-      node => $node,
-      devices => $node['devices'],
-      mdm_ip => $mdm_ip,
-    }
-  }
-
-  define add_sds_device ( $node_name, $node, $devices, $mdm_ip, $device_path = $title ) {
+  define add_sds_node ( $nodes, $mdm_ip, $node_name = $title ) {
+    $node = $nodes[$node_name]
+    $devices = $node['devices']
+    $device_keys = keys($devices)
+    # add_sds_device { $device_keys:
+    #   node_name => $node_name,
+    #   node => $node,
+    #   devices => $node['devices'],
+    #   mdm_ip => $mdm_ip,
+    # }
+    $device_path = $device_keys[0]
     $device = $devices[$device_path]
     $storage_pool = $device['storage_pool']
     if $storage_pool { $storage_pool_name = "--storage_pool_name '${storage_pool}'" }
@@ -25,6 +24,18 @@ class scaleio::sds inherits scaleio {
       require => Class['::scaleio::login']
     }
   }
+
+  # define add_sds_device ( $node_name, $node, $devices, $mdm_ip, $device_path = $title ) {
+  #   $device = $devices[$device_path]
+  #   $storage_pool = $device['storage_pool']
+  #   if $storage_pool { $storage_pool_name = "--storage_pool_name '${storage_pool}'" }
+  #   exec { "Add SDS ${node_name} device ${device_path}":
+  #     command => "scli --add_sds_device --mdm_ip ${mdm_ip[0]} --sds_ip ${node['ip']} --device_path ${device_path} ${storage_pool_name}",
+  #     path    => '/bin',
+  #     unless  => "scli --query_sds --mdm_ip ${mdm_ip[0]} --sds_name ${node_name} | grep ' Path: ${device_path}'",
+  #     require => Class['::scaleio::login']
+  #   }
+  # }
 
   if $mdm_ip[1] in $ip_address_array and 'mdm' in $components {
 
