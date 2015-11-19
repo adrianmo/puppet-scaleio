@@ -60,9 +60,10 @@ class scaleio::os_prep inherits scaleio {
   }
 
   if 'gui' in $scaleio::components or 'gw' in $scaleio::components {
-    if !$javaversion or $javaversion < "1.6" {
+    if !$javaversion or $javaversion < "1.8" {
       class{ 'java':
         distribution => 'jdk',
+        version => '1.8.0',
       }
     } else {
       notify {  "Java version up to date ${javaversion}": }
