@@ -53,6 +53,14 @@ class scaleio::os_prep inherits scaleio {
     notify { 'sds not in components and/or sds_ssd_env_flag not set': }
   }
 
+  if 'mdm' in $scaleio::components {
+    file_line { 'Append a MDM_ROLE_IS_MANAGER=1 line to /etc/environment':
+      path  => '/etc/environment',
+      match => '^MDM_ROLE_IS_MANAGER=',
+      line  => 'MDM_ROLE_IS_MANAGER=1',
+    }
+  }
+
   file { $scaleio::path :
     ensure => directory,
     owner  => root,

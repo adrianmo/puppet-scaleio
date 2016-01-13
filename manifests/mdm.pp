@@ -25,9 +25,17 @@ class scaleio::mdm inherits scaleio {
   define add_primary_mdm ($scaleio_mdm_state, $scaleio_primary_ip, $mdm_ip) {
 
     if !$scaleio_primary_ip or $scaleio_primary_ip == 'N/A' {
-      exec { 'Add Primary MDM':
-        command => "scli --mdm --add_primary_mdm --primary_mdm_ip ${mdm_ip[0]} --mdm_management_ip ${mdm_ip[0]} --accept_license",
-        path    => '/bin',
+      if $version == '1.32' {
+        exec { 'Add Primary MDM':
+          command => "scli --mdm --add_primary_mdm --primary_mdm_ip ${mdm_ip[0]} --mdm_management_ip ${mdm_ip[0]} --accept_license",
+          path    => '/bin',
+        }
+      }
+      if $version == '2.0' {
+        exec { 'Add Primary MDM':
+          command => "scli --approve_certificate --accept_license --create_mdm_cluster  --use_nonsecure_communication --master_mdm_ip ${mdm_ip[0]}",
+          path    => '/bin',
+        }
       }
     } else {
       notify {'Skipped Add Primary MDM': }
@@ -52,12 +60,31 @@ class scaleio::mdm inherits scaleio {
       exec { '1st Login New Password':
         command => "scli --mdm_ip ${mdm_ip[0]} --login --username admin --password ${password}",
         path    => '/bin',
-      } ->
-      exec { 'Add Secondary MDM':
-        command => "scli --add_secondary_mdm --mdm_ip ${mdm_ip[0]} --secondary_mdm_ip ${mdm_ip[1]}",
-        path    => '/bin',
       }
     }  else { notify {'Skipped Password Set and 2nd MDM Add': } }
+  }
+
+  define add_secondary_mdm ($scaleio_mdm_state, $scaleio_secondary_ip, $mdm_ip) {
+
+    notify {"Adding Secondary MDM IP: '${scaleio_secondary_ip}'": }
+    #using mdm_ip versus scaleio_primary_ip since scaleio_primary_ip may not be populated if first run
+
+    if !$scaleio_secondary_ip or $scaleio_secondary_ip == 'N/A' {
+      if $version == '1.32' {
+        exec { 'Add Secondary MDM':
+          command => "scli --add_secondary_mdm --mdm_ip ${mdm_ip[0]} --secondary_mdm_ip ${mdm_ip[1]}",
+          path    => '/bin',
+          require => Class['::scaleio::login']
+        }
+      }
+      if $version == '2.0' {
+        exec { 'Add Secondary MDM':
+          command => "scli --add_standby_mdm --mdm_ip ${mdm_ip[0]} --new_mdm_ip {mdm_ip[1]} --mdm_role manager --new_mdm_name mdm-slave",
+          path    => '/bin',
+          require => Class['::scaleio::login']
+        }
+      }
+    } else { notify {'Secondary MDM already exists':} }
   }
 
   define add_tiebreaker ($scaleio_mdm_state, $scaleio_tb_ip, $tb_ip, $mdm_ip) {
@@ -66,25 +93,45 @@ class scaleio::mdm inherits scaleio {
     #using mdm_ip versus scaleio_primary_ip since scaleio_primary_ip may not be populated if first run
 
     if !$scaleio_tb_ip or $scaleio_tb_ip == 'N/A' {
-      exec { 'Add TB':
-        command => "scli --add_tb --mdm_ip ${mdm_ip[0]} --tb_ip ${tb_ip}",
-        path    => '/bin',
-        require => Class['::scaleio::login']
+      if $version == '1.32' {
+        exec { 'Add TB':
+          command => "scli --add_tb --mdm_ip ${mdm_ip[0]} --tb_ip ${tb_ip}",
+          path    => '/bin',
+          require => Class['::scaleio::login']
+        }
+      }
+      if $version == '2.0' {
+        exec { 'Add TB':
+          command => "scli --add_standby_mdm --mdm_ip ${mdm_ip[0]} --new_mdm_ip ${tb_ip} --mdm_role tb --new_mdm_name mdm-tb",
+          path    => '/bin',
+          require => Class['::scaleio::login']
+        }
       }
     } else { notify {'Tie-Breaker already exists':} }
   }
 
 
-  define switch_to_cluster_mode ($enable_cluster_mode, $mdm_ip) {
+  define switch_to_cluster_mode ($enable_cluster_mode, $mdm_ip, $tb_ip) {
     notify {"Enable cluster mode: ${enable_cluster_mode}": }
 
     if $enable_cluster_mode {
-      exec { 'Switch to Cluster Mode':
-        command => "scli --mdm_ip ${mdm_ip[0]} --switch_to_cluster_mode",
-        path    => '/bin',
-        onlyif  => "scli --query_cluster --mdm_ip ${mdm_ip[0]} | grep ' Mode: Single'",
-        require => Class['::scaleio::login']
+      if $version == '1.32' {
+        exec { 'Switch to Cluster Mode':
+          command => "scli --mdm_ip ${mdm_ip[0]} --switch_to_cluster_mode",
+          path    => '/bin',
+          onlyif  => "scli --query_cluster --mdm_ip ${mdm_ip[0]} | grep ' Mode: Single'",
+          require => Class['::scaleio::login']
+        }
       }
+      if $version == '2.0' {
+        exec { 'Switch to Cluster Mode':
+          command => "scli --mdm_ip ${mdm_ip[0]} --switch_cluster_mode --cluster_mode 3_node --add_slave_mdm_ip ${mdm_ip[1]} --add_tb_ip ${tb_ip}",
+          path    => '/bin',
+          onlyif  => "scli --query_cluster --mdm_ip ${mdm_ip[0]} | grep ' Mode: Single'",
+          require => Class['::scaleio::login']
+        }
+      }
+
     } else { notify {'Cluster Mode not required':} }
   }
 
@@ -170,6 +217,13 @@ class scaleio::mdm inherits scaleio {
       # Perform a normal login
       class {'scaleio::login': } ->
 
+      # Add Secondary MDM
+      add_secondary_mdm { 'Add Secondary MDM':
+        scaleio_mdm_state    => $scaleio_mdm_state,
+        scaleio_secondary_ip => $scaleio_secondary_ip,
+        mdm_ip               => $mdm_ip,
+      } ->
+
       # Add Tie-Breaker
       add_tiebreaker { 'Add Tie-Breaker':
         scaleio_mdm_state => $scaleio_mdm_state,
@@ -181,6 +235,7 @@ class scaleio::mdm inherits scaleio {
       switch_to_cluster_mode { 'Switch to cluster mode':
         enable_cluster_mode => $enable_cluster_mode,
         mdm_ip              => $mdm_ip,
+        tb_ip               => $tb_ip,
       } ->
 
       rename_cluster { 'Rename cluster':
