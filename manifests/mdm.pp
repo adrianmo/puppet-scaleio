@@ -44,10 +44,10 @@ class scaleio::mdm inherits scaleio {
 
   define change_password ($scaleio_secondary_ip, $scaleio_mdm_state, $password, $default_password, $mdm_ip, $version) {
 
-    $approve_certificate = ''
-
     if $version == '2.0' {
       $approve_certificate = '--approve_certificate'
+    } else {
+      $approve_certificate = ''
     }
 
     notify { "scaleio_secondary_ip = '${scaleio_secondary_ip}'":}  ->
