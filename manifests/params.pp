@@ -25,17 +25,21 @@ class scaleio::params {
     'RedHat', 'SUSE' : {
       $path         = '/opt/scaleio'
       $use_ssd      = false
-      
-      $pkgs         = { callhome => "EMC-ScaleIO-callhome",
-                        mdm      => "EMC-ScaleIO-mdm",
-                        lia      => "EMC-ScaleIO-lia",
-                        sds      => "EMC-ScaleIO-sds",
-                        sdc      => "EMC-ScaleIO-sdc",
-                        tb       => "EMC-ScaleIO-tb",
-                        gw       => "EMC-ScaleIO-gateway",
-                        gui      => "EMC-ScaleIO-gui"
+
+      $pkgs         = { callhome => 'EMC-ScaleIO-callhome',
+                        mdm      => 'EMC-ScaleIO-mdm',
+                        lia      => 'EMC-ScaleIO-lia',
+                        sds      => 'EMC-ScaleIO-sds',
+                        sdc      => 'EMC-ScaleIO-sdc',
+                        tb       => 'EMC-ScaleIO-tb',
+                        gw       => 'EMC-ScaleIO-gateway',
+                        gui      => 'EMC-ScaleIO-gui'
                       }
-      $drv_cfg_file  = "/bin/emc/scaleio/drv_cfg.txt"
+      if $version == '2.0' {
+        $pkgs['tb'] = 'EMC-ScaleIO-mdm'
+      }
+
+      $drv_cfg_file  = '/bin/emc/scaleio/drv_cfg.txt'
     }
     default: {
       fail("ScaleIO installation is not supported on an ${::osfamily} based system.")
