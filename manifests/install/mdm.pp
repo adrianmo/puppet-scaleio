@@ -7,7 +7,7 @@ class scaleio::install::mdm {
       ensure => installed,
     } ->
     package { $scaleio::pkgs['mdm']:
-      ensure  => $scaleio::version,
+      ensure  => $mdm_version,
       require => Class[ '::scaleio::shm' ],
     }
   } else {

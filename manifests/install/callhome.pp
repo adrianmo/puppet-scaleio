@@ -2,7 +2,7 @@ class scaleio::install::callhome {
 
   if 'callhome' in $scaleio::components {
     package { $scaleio::pkgs['callhome']:
-      ensure   => $scaleio::version,
+      ensure   => 'latest',
     }
   } else {
     notify {  'callhome component not specified': }

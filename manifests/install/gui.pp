@@ -6,7 +6,7 @@ class scaleio::install::gui {
     }
 
     package { $scaleio::pkgs['gui']:
-      ensure  => $scaleio::version,
+      ensure  => $gui_version,
       require => Package['java-1.8.0-openjdk-devel'],
     }
   } else {

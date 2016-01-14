@@ -6,7 +6,7 @@ class scaleio::install::gw {
     }
 
     package { $scaleio::pkgs['gw']:
-      ensure  => $scaleio::version,
+      ensure  => $gw_version,
       require => Package['java-1.8.0-openjdk-devel'],
     }
   } else {

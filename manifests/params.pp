@@ -1,16 +1,16 @@
 class scaleio::params {
 
-  $cluster_name         = "cluster1"
+  $cluster_name         = 'cluster1'
   $components           = undef
   $callhome_cfg         = undef
-  $default_password     = "admin"
+  $default_password     = 'admin'
   $enable_cluster_mode  = true
   $ensure               = undef
-  $gw_password          = "Scaleio123"
+  $gw_password          = 'Scaleio123'
   $interface            = undef
   $license              = undef
   $mdm_ip               = undef
-  $password             = "Scaleio123"
+  $password             = 'Scaleio123'
   $tb_ip                = undef
   $rpm_suffix           = undef
   $shm_size             = 536866816
