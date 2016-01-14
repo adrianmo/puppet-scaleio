@@ -86,7 +86,7 @@ class scaleio::mdm inherits scaleio {
       }
       if $version == '2.0' {
         exec { 'Add Secondary MDM':
-          command => "scli --add_standby_mdm --mdm_ip ${mdm_ip[0]} --new_mdm_ip {mdm_ip[1]} --mdm_role manager --new_mdm_name mdm-slave",
+          command => "scli --add_standby_mdm --mdm_ip ${mdm_ip[0]} --new_mdm_ip ${mdm_ip[1]} --mdm_role manager --new_mdm_name mdm-slave",
           path    => '/bin',
           require => Class['::scaleio::login']
         }
