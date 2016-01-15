@@ -64,6 +64,9 @@ class scaleio::os_prep inherits scaleio {
       path  => '/etc/environment',
       match => '^MDM_ROLE_IS_MANAGER=',
       line  => 'MDM_ROLE_IS_MANAGER=1',
+    } ->
+    exec { 'Export environment variable MDM_ROLE_IS_MANAGER=1':
+      command => "/bin/bash -c \"export MDM_ROLE_IS_MANAGER=1\"",
     }
   }
 
